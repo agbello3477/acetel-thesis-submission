@@ -1,0 +1,78 @@
+services:
+  atss-db:
+    image: postgres:15-alpine
+    container_name: atss_postgres_container
+    environment:
+      - POSTGRES_DB=atss_db
+      - POSTGRES_USER=acetel_admin
+      - POSTGRES_PASSWORD=acetel_secure_pass
+    ports:
+      - "5499:5432" # Isolated port to avoid conflict with local Postgres
+    networks:
+      - atss_isolated_network
+    volumes:
+      - atss_db_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+
+  atss-backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: atss_api_service
+    depends_on:
+      - atss-db
+      - atss-storage
+    ports:
+      - "8080:8000" # Isolated port to avoid conflict with other web projects
+    env_file:
+      - .env
+    networks:
+      - atss_isolated_network
+    volumes:
+      - ./backend:/app # For live reload
+      - /app/node_modules # Prevent overwriting container's node_modules
+
+  atss-frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: atss_react_app
+    ports:
+      - "8181:5173"
+    networks:
+      - atss_isolated_network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  atss-storage:
+    image: minio/minio
+    container_name: atss_minio_storage
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - atss_isolated_network
+    volumes:
+      - atss_storage_data:/data
+
+  atss-mail:
+    image: mailhog/mailhog
+    container_name: atss_mail_mock
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI
+    networks:
+      - atss_isolated_network
+
+networks:
+  atss_isolated_network:
+    driver: bridge
+
+volumes:
+  atss_db_data:
+  atss_storage_data:
