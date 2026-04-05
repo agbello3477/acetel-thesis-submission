@@ -34,8 +34,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             res.status(400).json({ error: 'Matric number or email already exists' });
             return;
         }
-        console.error(error);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Registration Error Details:', error);
+        res.status(500).json({ error: error.message || 'Server error' });
     }
 };
 
