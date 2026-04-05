@@ -127,7 +127,7 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
         matric_number: '',
         email: '',
         program_type: 'MSc',
-        department: '',
+        phone_number: '',
         password: '',
     });
 
@@ -135,7 +135,7 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
     const [adminReg, setAdminReg] = useState({
         full_name: '',
         email: '',
-        department: '',
+        staff_id: '',
         password: '',
         role: 'admin',
     });
@@ -170,6 +170,14 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
             setMode('login');
             setEmail(studentReg.email);
             setPassword('');
+            setStudentReg({
+                full_name: '',
+                matric_number: '',
+                email: '',
+                program_type: 'MSc',
+                phone_number: '',
+                password: '',
+            });
         } catch (err: any) {
             toast.error(err.response?.data?.error || 'Registration failed');
         } finally {
@@ -186,6 +194,13 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
             setMode('login');
             setEmail(adminReg.email);
             setPassword('');
+            setAdminReg({
+                full_name: '',
+                email: '',
+                staff_id: '',
+                password: '',
+                role: 'admin',
+            });
         } catch (err: any) {
             toast.error(err.response?.data?.error || 'Registration failed');
         } finally {
@@ -300,7 +315,7 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
                                 <option value="PhD">PhD Program</option>
                             </select>
                         </div>
-                        <Input name="department" placeholder="Department" value={studentReg.department} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
+                        <Input name="phone_number" placeholder="Phone Number" value={studentReg.phone_number} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         <Input name="email" type="email" placeholder="Email address" value={studentReg.email} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         <Input name="password" type="password" placeholder="Create Password" value={studentReg.password} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         
@@ -328,7 +343,7 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
 
                     <form onSubmit={handleAdminRegister} className="space-y-4">
                         <Input name="full_name" placeholder="Full Name" value={adminReg.full_name} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
-                        <Input name="department" placeholder="Department (e.g. Administration)" value={adminReg.department} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
+                        <Input name="staff_id" placeholder="Staff ID Number" value={adminReg.staff_id} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         <Input name="email" type="email" placeholder="Official Email address" value={adminReg.email} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         <Input name="password" type="password" placeholder="Create Password" value={adminReg.password} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         

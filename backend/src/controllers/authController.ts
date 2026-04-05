@@ -7,16 +7,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_jwt_key_for_atss';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { full_name, matric_number, email, role, program_type, department, password } = req.body;
+        const { full_name, matric_number, email, role, program_type, phone_number, staff_id, password } = req.body;
 
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
         const result = await query(
-            `INSERT INTO users (full_name, matric_number, email, role, program_type, department, password_hash)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, full_name, email, role`,
-            [full_name, matric_number, email, role || 'student', program_type, department, password_hash]
+            `INSERT INTO users (full_name, matric_number, email, role, program_type, phone_number, staff_id, password_hash)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, full_name, email, role`,
+            [full_name, matric_number, email, role || 'student', program_type, phone_number, staff_id, password_hash]
         );
 
         res.status(201).json({ message: 'User registered successfully', user: result.rows[0] });

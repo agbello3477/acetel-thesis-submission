@@ -8,7 +8,8 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     role VARCHAR(20) CHECK (role IN ('student', 'admin')),
     program_type VARCHAR(10) CHECK (program_type IN ('MSc', 'PhD')),
-    department VARCHAR(100),
+    phone_number VARCHAR(20),
+    staff_id VARCHAR(50) UNIQUE,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

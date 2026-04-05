@@ -6,7 +6,7 @@ INSERT INTO users (
         email,
         role,
         program_type,
-        department,
+        staff_id,
         password_hash
     )
 VALUES (
@@ -16,7 +16,7 @@ VALUES (
         'admin@acetel.edu.ng',
         'admin',
         NULL,
-        'Admin Dept',
+        'STAFF-ADM-001',
         '$2b$10$OWTMSqebDEn9J3RuB/Sb1uYIQt6UGWZ4VH3bmsuRBpgqzTxvzptLa'
     );
 -- 2. Insert 10 Student Users (5 MSc, 5 PhD)
@@ -29,7 +29,7 @@ INSERT INTO users (
         email,
         role,
         program_type,
-        department,
+        phone_number,
         password_hash
     )
 VALUES (
@@ -38,7 +38,7 @@ VALUES (
         'student.msc' || i || '@stu.acetel.edu.ng',
         'student',
         'MSc',
-        'Computer Science',
+        '+23480000000' || i,
         '$2b$10$OWTMSqebDEn9J3RuB/Sb1uYIQt6UGWZ4VH3bmsuRBpgqzTxvzptLa'
     )
 RETURNING * INTO student_record;
@@ -70,24 +70,16 @@ VALUES (
 END LOOP;
 FOR i IN 1..5 LOOP
 INSERT INTO users (
-        full_name,
-        matric_number,
-        email,
-        role,
-        program_type,
-        department,
-        password_hash
-    )
-VALUES (
+        full_name, matric_number, email, role, program_type, phone_number, password_hash
+    ) VALUES (
         'Student PhD ' || i,
         'PHD20230' || i,
         'student.phd' || i || '@stu.acetel.edu.ng',
         'student',
         'PhD',
-        'Information Technology',
+        '+23480000100' || i,
         '$2b$10$OWTMSqebDEn9J3RuB/Sb1uYIQt6UGWZ4VH3bmsuRBpgqzTxvzptLa'
-    )
-RETURNING * INTO student_record;
+    ) RETURNING * INTO student_record;
 INSERT INTO submissions (
         student_id,
         title,
