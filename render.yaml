@@ -3,6 +3,7 @@ services:
   - type: web
     name: atss-backend
     runtime: node
+    rootDir: backend
     plan: free # Can be changed to 'pro' or others
     buildCommand: npm install && npm run build
     startCommand: npm run start
@@ -30,6 +31,7 @@ services:
   - type: web
     name: atss-frontend
     runtime: static
+    rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
