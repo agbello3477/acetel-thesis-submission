@@ -10,9 +10,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: atss-db
-          property: connectionString
+        sync: false # Provide your existing Render DB URL, or a URL from Supabase/Neon
       - key: JWT_SECRET
         generateValue: true
       - key: PORT
@@ -45,8 +43,4 @@ services:
         source: /*
         destination: /index.html
 
-# 3. Database (PostgreSQL)
-databases:
-  - name: atss-db
-    plan: free
-    ipAllowList: [] # Only allow internal access
+
