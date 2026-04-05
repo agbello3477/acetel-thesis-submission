@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FileText, ShieldCheck, BarChart3, LogIn, UserPlus, GraduationCap, LockKeyhole } from 'lucide-react';
+import { FileText, ShieldCheck, LogIn, UserPlus, GraduationCap, LockKeyhole } from 'lucide-react';
 import { LogoSlider } from '@/components/LogoSlider';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
