@@ -16,7 +16,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         const result = await query(
             `INSERT INTO users (full_name, matric_number, email, role, program_type, phone_number, staff_id, password_hash)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, full_name, email, role`,
-            [full_name, matric_number, email, role || 'student', program_type, phone_number, staff_id, password_hash]
+            [
+                full_name ?? null, 
+                matric_number ?? null, 
+                email ?? null, 
+                role || 'student', 
+                program_type ?? null, 
+                phone_number ?? null, 
+                staff_id ?? null, 
+                password_hash
+            ]
         );
 
         res.status(201).json({ message: 'User registered successfully', user: result.rows[0] });
