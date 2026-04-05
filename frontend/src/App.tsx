@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
-import AdminRegister from './pages/Auth/AdminRegister';
 import StudentDashboard from './pages/Student/StudentDashboard';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import { Toaster } from 'react-hot-toast';
@@ -13,7 +12,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Navigate to="/" replace />} />
                 <Route path="/register" element={<Navigate to="/" replace />} />
-                <Route path="/admin/register" element={<AdminRegister />} />
+                <Route path="/admin/register" element={<Navigate to="/" replace />} />
                 <Route path="/student/*" element={<StudentDashboard />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
             </Routes>
