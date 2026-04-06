@@ -64,7 +64,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
         const token = jwtLib.sign(payload, JWT_SECRET, { expiresIn: '1d' });
 
-        res.json({ token, user: { id: user.id, full_name: user.full_name, role: user.role, program_type: user.program_type } });
+        res.json({ token, user: { id: user.id, full_name: user.full_name, role: user.role, program_type: user.program_type, matric_number: user.matric_number } });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Server error' });
