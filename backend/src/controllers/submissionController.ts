@@ -82,7 +82,13 @@ export const getSubmissions = async (req: Request, res: Response): Promise<void>
         ORDER BY s.created_at DESC
       `);
         } else {
-            result = await query(`SELECT * FROM submissions WHERE student_id = $1 ORDER BY created_at DESC`, [user.id]);
+            result = await query(`
+                SELECT s.*, 
+                       (SELECT comments FROM submission_logs l WHERE l.submission_id = s.id ORDER BY l.timestamp DESC LIMIT 1) as admin_comment
+                FROM submissions s 
+                WHERE student_id = $1 
+                ORDER BY created_at DESC
+            `, [user.id]);
         }
 
         res.json(result.rows);

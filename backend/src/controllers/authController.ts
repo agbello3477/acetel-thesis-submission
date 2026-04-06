@@ -9,6 +9,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     try {
         const { full_name, matric_number, email, role, program_type, phone_number, staff_id, password } = req.body;
 
+        if (!email || !email.toLowerCase().endsWith('@noun.edu.ng')) {
+            res.status(400).json({ error: 'Only @noun.edu.ng email domains are allowed' });
+            return;
+        }
+
+        if (role !== 'admin' && (!matric_number || !matric_number.toUpperCase().startsWith('ACE'))) {
+            res.status(400).json({ error: 'Matric number must start with ACE' });
+            return;
+        }
+
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);

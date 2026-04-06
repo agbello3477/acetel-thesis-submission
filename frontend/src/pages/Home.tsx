@@ -306,7 +306,7 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
                     <form onSubmit={handleStudentRegister} className="space-y-3">
                         <Input name="full_name" placeholder="Full Name" value={studentReg.full_name} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         <div className="grid grid-cols-2 gap-3">
-                            <Input name="matric_number" placeholder="Matric No." value={studentReg.matric_number} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
+                            <Input name="matric_number" placeholder="Matric No. (ACE...)" value={studentReg.matric_number} required pattern="^ACE.*" title="Matric number must start with ACE" onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                             <select 
                                 name="program_type" 
                                 value={studentReg.program_type}
@@ -319,7 +319,7 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
                             </select>
                         </div>
                         <Input name="phone_number" placeholder="Phone Number" value={studentReg.phone_number} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
-                        <Input name="email" type="email" placeholder="Email address" value={studentReg.email} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
+                        <Input name="email" type="email" placeholder="Email address" value={studentReg.email} required pattern=".*@noun\.edu\.ng$" title="Email must end with @noun.edu.ng" onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         <Input name="password" type="password" placeholder="Create Password" value={studentReg.password} required onChange={handleStudentChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         
                         <Button type="submit" className="w-full h-12 mt-2 text-base font-bold bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-200/50 transition-all hover:-translate-y-0.5" disabled={loading}>
@@ -347,7 +347,7 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
                     <form onSubmit={handleAdminRegister} className="space-y-4">
                         <Input name="full_name" placeholder="Full Name" value={adminReg.full_name} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         <Input name="staff_id" placeholder="Staff ID Number" value={adminReg.staff_id} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
-                        <Input name="email" type="email" placeholder="Official Email address" value={adminReg.email} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
+                        <Input name="email" type="email" placeholder="Official Email address" value={adminReg.email} required pattern=".*@noun\.edu\.ng$" title="Email must end with @noun.edu.ng" onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         <Input name="password" type="password" placeholder="Create Password" value={adminReg.password} required onChange={handleAdminChange} className="h-11 bg-white/50 focus-visible:bg-white" />
                         
                         <Button type="submit" className="w-full h-12 mt-2 text-base font-bold bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-200/50 transition-all hover:-translate-y-0.5" disabled={loading}>
