@@ -3,8 +3,11 @@ import Home from './pages/Home';
 import StudentDashboard from './pages/Student/StudentDashboard';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import { Toaster } from 'react-hot-toast';
+import { useActivityLogger } from './lib/useActivityLogger';
 
 function App() {
+    useActivityLogger();
+
     return (
         <Router>
             <Toaster position="top-right" />

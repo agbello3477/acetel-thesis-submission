@@ -11,6 +11,7 @@ export default function AdminDashboard() {
     const navigate = useNavigate();
     const [stats, setStats] = useState<any>(null);
     const [submissions, setSubmissions] = useState([]);
+    const [activityLogs, setActivityLogs] = useState<any[]>([]);
     const [filter, setFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [yearFilter, setYearFilter] = useState('All');
@@ -40,11 +41,13 @@ export default function AdminDashboard() {
 
     const fetchData = async (isPolling: boolean = false) => {
         try {
-            const [statsRes, subsRes] = await Promise.all([
+            const [statsRes, subsRes, logsRes] = await Promise.all([
                 api.get('/analytics/stats'),
-                api.get('/submissions')
+                api.get('/submissions'),
+                api.get('/analytics/activity')
             ]);
             setStats(statsRes.data);
+            setActivityLogs(logsRes.data || []);
             
             const newSubs = subsRes.data;
             if (newSubs.length > 0) {
@@ -358,6 +361,37 @@ export default function AdminDashboard() {
                         ))}
                     </ul>
                 </div>
+
+                {/* Activity Logs Stream */}
+                {activityLogs && activityLogs.length > 0 && (
+                    <div className="bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden mt-8 animate-fade-in-up">
+                        <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                            <h3 className="text-lg font-bold text-slate-800">Global Activity Stream</h3>
+                            <p className="text-sm text-slate-500 mt-1">Live tracking of active user interactions across the application</p>
+                        </div>
+                        <ul className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
+                            {activityLogs.map((log: any) => (
+                                <li key={log.id} className="p-4 sm:px-6 hover:bg-slate-50/80 transition-colors flex items-start gap-4">
+                                    <div className="mt-1 p-2 bg-indigo-50 text-indigo-600 rounded-xl flex-shrink-0">
+                                        <Clock className="h-4 w-4" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm text-slate-800 font-medium">
+                                            <span className="font-bold text-indigo-700">{log.user_name || 'Guest'}</span> clicked{' '}
+                                            <span className="font-bold bg-slate-100 px-2 rounded">{log.target}</span>
+                                        </p>
+                                        <p className="text-xs text-slate-400 mt-1">
+                                            {new Date(log.created_at).toLocaleString()}
+                                        </p>
+                                    </div>
+                                    <span className="text-[10px] uppercase font-bold text-indigo-400 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                                        {log.role || 'Guest'}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
             </main>
         </div>

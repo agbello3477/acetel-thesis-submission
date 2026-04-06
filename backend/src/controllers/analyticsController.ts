@@ -53,3 +53,40 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+export const logActivity = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { action_type, target } = req.body;
+        const user = (req as any).user;
+
+        if (!action_type || !target) {
+            res.status(400).json({ error: 'Missing required fields' });
+            return;
+        }
+
+        await query(
+            `INSERT INTO activity_logs (user_id, action_type, target) VALUES ($1, $2, $3)`,
+            [user?.id || null, action_type, target]
+        );
+        res.status(201).json({ message: 'Activity logged successfully' });
+    } catch (error) {
+        console.error('Activity logging failed:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getActivityLogs = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const result = await query(`
+            SELECT a.*, u.full_name as user_name, u.role
+            FROM activity_logs a
+            JOIN users u ON a.user_id = u.id
+            ORDER BY a.created_at DESC
+            LIMIT 100
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Fetch Activity Log Error:', error);
+        res.status(500).json({ error: 'Server error fetching logs' });
+    }
+};
