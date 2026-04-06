@@ -363,12 +363,13 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Activity Logs Stream */}
-                {activityLogs && activityLogs.length > 0 && (
-                    <div className="bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden mt-8 animate-fade-in-up">
-                        <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-                            <h3 className="text-lg font-bold text-slate-800">Global Activity Stream</h3>
-                            <p className="text-sm text-slate-500 mt-1">Live tracking of active user interactions across the application</p>
-                        </div>
+                <div id="activity-logs" className="bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden mt-8 animate-fade-in-up scroll-mt-6">
+                    <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                        <h3 className="text-lg font-bold text-slate-800">Global Activity Stream</h3>
+                        <p className="text-sm text-slate-500 mt-1">Live tracking of active user interactions across the application</p>
+                    </div>
+                    
+                    {activityLogs && activityLogs.length > 0 ? (
                         <ul className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
                             {activityLogs.map((log: any) => (
                                 <li key={log.id} className="p-4 sm:px-6 hover:bg-slate-50/80 transition-colors flex items-start gap-4">
@@ -390,8 +391,12 @@ export default function AdminDashboard() {
                                 </li>
                             ))}
                         </ul>
-                    </div>
-                )}
+                    ) : (
+                        <div className="p-12 text-center text-slate-500 font-medium">
+                            No user activity logged yet. New interactive clicks will appear here instantly.
+                        </div>
+                    )}
+                </div>
 
             </main>
         </div>
