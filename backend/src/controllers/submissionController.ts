@@ -63,9 +63,9 @@ export const submitThesis = async (req: Request, res: Response): Promise<void> =
         );
 
         res.status(201).json({ message: 'Thesis submitted successfully', submission: result.rows[0] });
-    } catch (error) {
-        console.error('Submission error:', error);
-        res.status(500).json({ error: 'Internal server error during submission' });
+    } catch (error: any) {
+        console.error('Submission Error Details:', error);
+        res.status(500).json({ error: error.message || 'Internal server error during submission' });
     }
 };
 
