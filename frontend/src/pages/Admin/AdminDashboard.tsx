@@ -80,12 +80,12 @@ export default function AdminDashboard() {
     const downloadCSV = () => {
         if (submissions.length === 0) return;
 
-        const headers = ["ID", "Title", "Student", "Matric Number", "Program", "Status", "Supervisor", "Submission Year"];
+        const headers = ["S/N", "Title", "Student", "Matric Number", "Program", "Status", "Supervisor", "Submission Year"];
         const csvRows = [headers.join(',')];
 
-        submissions.forEach((sub: any) => {
+        submissions.forEach((sub: any, index: number) => {
             const rawRow = [
-                sub.id,
+                index + 1,
                 `"${sub.title.replace(/"/g, '""')}"`,
                 `"${sub.full_name}"`,
                 sub.matric_number,
