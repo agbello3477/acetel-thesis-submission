@@ -147,6 +147,9 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
             const response = await api.post('/auth/login', { email, password });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
+            
+            api.post('/analytics/activity', { action_type: 'LOGIN', target: 'Authenticated and logged into the system' }).catch(()=>{});
+            
             toast.success('Logged in successfully');
 
             if (response.data.user.role === 'admin') {

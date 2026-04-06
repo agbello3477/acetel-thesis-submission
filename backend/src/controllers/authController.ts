@@ -89,7 +89,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
     try {
         const user = (req as any).user;
-        if (user.email !== 'agbello@noun.edu.ng') {
+        if (user.email.toLowerCase() !== 'agbello@noun.edu.ng') {
             res.status(403).json({ error: 'Access denied. Super Admin strictly required.' });
             return;
         }
@@ -105,7 +105,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 export const blockUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const user = (req as any).user;
-        if (user.email !== 'agbello@noun.edu.ng') {
+        if (user.email.toLowerCase() !== 'agbello@noun.edu.ng') {
             res.status(403).json({ error: 'Access denied. Super Admin strictly required.' });
             return;
         }
@@ -123,7 +123,7 @@ export const blockUser = async (req: Request, res: Response): Promise<void> => {
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const user = (req as any).user;
-        if (user.email !== 'agbello@noun.edu.ng') {
+        if (user.email.toLowerCase() !== 'agbello@noun.edu.ng') {
             res.status(403).json({ error: 'Access denied. Super Admin strictly required.' });
             return;
         }

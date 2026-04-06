@@ -30,10 +30,12 @@ export default function StudentDashboard() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        toast.success('Logged out successfully');
-        navigate('/login');
+        api.post('/analytics/activity', { action_type: 'LOGOUT', target: 'Student explicit logout' }).finally(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            toast.success('Logged out successfully');
+            navigate('/login');
+        });
     };
 
     return (
