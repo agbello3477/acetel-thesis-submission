@@ -14,7 +14,7 @@ export default function AdminDashboard() {
     const [filter, setFilter] = useState('All');
     const [user, setUser] = useState<any>(null);
 
-    const [latestSubId, setLatestSubId] = useState<string | null>(null);
+    const [, setLatestSubId] = useState<string | null>(null);
 
     useEffect(() => {
         // Request desktop notification permission on mount
