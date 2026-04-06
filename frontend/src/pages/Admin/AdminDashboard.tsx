@@ -28,11 +28,28 @@ export default function AdminDashboard() {
             Notification.requestPermission();
         }
         
-        fetchData(false);
         const userData = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
         if (userData) {
-            setUser(JSON.parse(userData));
+            let parsedUser = JSON.parse(userData);
+            // Self-healing: If email was missing from old login response, recover it from JWT
+            if (!parsedUser.email && token) {
+                try {
+                    const base64Url = token.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const decoded = JSON.parse(window.atob(base64));
+                    if (decoded.email) {
+                        parsedUser.email = decoded.email;
+                        localStorage.setItem('user', JSON.stringify(parsedUser));
+                    }
+                } catch (e) {
+                    console.error('Session recovery failed', e);
+                }
+            }
+            setUser(parsedUser);
         }
+        
+        fetchData(false);
 
         // Live polling every 30 seconds for optimization vs UX
         const interval = setInterval(() => {
