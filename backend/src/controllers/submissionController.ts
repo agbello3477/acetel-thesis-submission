@@ -76,7 +76,7 @@ export const getSubmissions = async (req: Request, res: Response): Promise<void>
 
         if (user.role === 'admin') {
             result = await query(`
-        SELECT s.*, u.full_name, u.matric_number, u.program_type, u.department 
+        SELECT s.*, u.full_name, u.matric_number, u.program_type, u.phone_number, u.staff_id
         FROM submissions s 
         JOIN users u ON s.student_id = u.id 
         ORDER BY s.created_at DESC

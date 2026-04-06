@@ -14,22 +14,54 @@ export default function AdminDashboard() {
     const [filter, setFilter] = useState('All');
     const [user, setUser] = useState<any>(null);
 
+    const [latestSubId, setLatestSubId] = useState<string | null>(null);
+
     useEffect(() => {
-        fetchData();
+        // Request desktop notification permission on mount
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        
+        fetchData(false);
         const userData = localStorage.getItem('user');
         if (userData) {
             setUser(JSON.parse(userData));
         }
+
+        // Live polling every 30 seconds for optimization vs UX
+        const interval = setInterval(() => {
+            fetchData(true);
+        }, 30000);
+        return () => clearInterval(interval);
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = async (isPolling: boolean = false) => {
         try {
             const [statsRes, subsRes] = await Promise.all([
                 api.get('/analytics/stats'),
                 api.get('/submissions')
             ]);
             setStats(statsRes.data);
-            setSubmissions(subsRes.data);
+            
+            const newSubs = subsRes.data;
+            if (newSubs.length > 0) {
+                const newestId = newSubs[0].id;
+                
+                // If this is a poll, and we have a new ID that we haven't seen before
+                setLatestSubId(prev => {
+                    if (isPolling && prev && newestId !== prev) {
+                        toast.success('New thesis submission just arrived!', { icon: '🔔' });
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('New ATSS Submission', {
+                                body: `${newSubs[0].full_name} submitted "${newSubs[0].title}"`,
+                                icon: '/vite.svg'
+                            });
+                        }
+                    }
+                    return newestId;
+                });
+            }
+            setSubmissions(newSubs);
         } catch (err) {
             console.error(err);
         }
@@ -174,7 +206,7 @@ export default function AdminDashboard() {
                 )}
 
                 {stats && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 animate-fade-in-up animation-delay-100">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 animate-fade-in-up">
                         {/* Status Breakdown Bar Chart */}
                         <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-80 flex flex-col">
                             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Submission Status Overview</h3>
@@ -221,7 +253,7 @@ export default function AdminDashboard() {
                 )}
 
                 {/* Submissions List */}
-                <div className="bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden mt-8 animate-fade-in-up animation-delay-200">
+                <div className="bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden mt-8 animate-fade-in-up">
                     <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <h3 className="text-lg font-bold text-slate-800">Review Queue</h3>

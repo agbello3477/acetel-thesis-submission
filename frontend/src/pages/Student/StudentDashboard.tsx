@@ -65,7 +65,7 @@ export default function StudentDashboard() {
                 </div>
             </header>
             <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                         <div>
                             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Your Theses</h2>
