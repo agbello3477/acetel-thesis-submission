@@ -12,6 +12,8 @@ export default function AdminDashboard() {
     const [stats, setStats] = useState<any>(null);
     const [submissions, setSubmissions] = useState([]);
     const [activityLogs, setActivityLogs] = useState<any[]>([]);
+    const [systemUsers, setSystemUsers] = useState<any[]>([]);
+    const [activeTab, setActiveTab] = useState<'overview' | 'users'>('overview');
     const [filter, setFilter] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [yearFilter, setYearFilter] = useState('All');
@@ -111,6 +113,44 @@ export default function AdminDashboard() {
         toast.success('Report exported as CSV');
     };
 
+    const isSuperAdmin = user?.email === 'agbello@noun.edu.ng';
+
+    const fetchUsers = async () => {
+        try {
+            const res = await api.get('/auth/users');
+            setSystemUsers(res.data);
+        } catch (err) {
+            toast.error('Failed to load system users');
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'users' && isSuperAdmin) {
+            fetchUsers();
+        }
+    }, [activeTab, isSuperAdmin]);
+
+    const handleBlockUser = async (id: string, currentlyBlocked: boolean) => {
+        try {
+            await api.put(`/auth/users/${id}/block`, { is_blocked: !currentlyBlocked });
+            toast.success(`User successfully ${!currentlyBlocked ? 'suspended' : 'unsuspended'}`);
+            fetchUsers();
+        } catch (err: any) {
+            toast.error(err.response?.data?.error || 'Failed to update user status');
+        }
+    };
+
+    const handleDeleteUser = async (id: string) => {
+        if (!confirm("CRITICAL WARNING: Are you sure you want to completely erase this user from the system? This action cannot be reversed!")) return;
+        try {
+            await api.delete(`/auth/users/${id}`);
+            toast.success('User permanently deleted');
+            fetchUsers();
+        } catch (err: any) {
+            toast.error(err.response?.data?.error || 'Failed to delete user');
+        }
+    };
+
     const uniqueYears = Array.from(new Set(submissions.map((s: any) => s.submission_year))).sort().reverse();
     const uniquePrograms = Array.from(new Set(submissions.map((s: any) => s.program_type)));
 
@@ -157,12 +197,107 @@ export default function AdminDashboard() {
                         </Button>
                     </div>
                 </div>
+
+                {isSuperAdmin && (
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+                        <div className="flex gap-2 p-1 bg-slate-100/80 rounded-2xl w-fit">
+                            <button
+                                onClick={() => setActiveTab('overview')}
+                                className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'overview' ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                Dashboard Overview
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('users')}
+                                className={`px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeTab === 'users' ? 'bg-indigo-600 shadow-md shadow-indigo-200 text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                <Shield className="h-4 w-4" /> Super Admin Center
+                            </button>
+                        </div>
+                    </div>
+                )}
             </header>
 
             <main className="flex-1 max-w-7xl w-full mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8 animate-fade-in-up">
 
-                {/* Analytics Section */}
-                {stats && (
+                {activeTab === 'users' ? (
+                    <div className="bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden animate-fade-in-up">
+                        <div className="px-6 py-8 border-b border-slate-100 bg-slate-900 text-white">
+                            <h3 className="text-2xl font-bold flex items-center gap-3">
+                                <Shield className="h-7 w-7 text-indigo-400" />
+                                Master User Directory
+                            </h3>
+                            <p className="text-sm text-slate-400 mt-2">Danger Zone: You have absolute authority to permanently suspend or wipe accounts.</p>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50 border-b border-slate-100">
+                                    <tr>
+                                        <th className="px-6 py-4 font-bold text-slate-600">User Identity</th>
+                                        <th className="px-6 py-4 font-bold text-slate-600 hidden md:table-cell">Contact</th>
+                                        <th className="px-6 py-4 font-bold text-slate-600 hidden lg:table-cell">Reg. Date</th>
+                                        <th className="px-6 py-4 font-bold text-slate-600">Rights</th>
+                                        <th className="px-6 py-4 font-bold text-slate-600text-right">Enforcement</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {systemUsers.map((u) => (
+                                        <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="font-bold text-slate-900">{u.full_name}</div>
+                                                <div className="text-xs text-slate-500 font-medium">{u.role === 'admin' ? `Staff ID: ${u.phone_number}` : `Matric: ${u.matric_number}`}</div>
+                                            </td>
+                                            <td className="px-6 py-4 hidden md:table-cell font-medium text-slate-600">
+                                                {u.email}
+                                            </td>
+                                            <td className="px-6 py-4 hidden lg:table-cell text-slate-500 text-xs font-medium">
+                                                {new Date(u.created_at).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex gap-2 flex-col items-start items-center">
+                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                        {u.role}
+                                                    </span>
+                                                    {u.is_blocked && (
+                                                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-700">Suspended</span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 flex items-center justify-end gap-2">
+                                                {u.email !== 'agbello@noun.edu.ng' && (
+                                                    <>
+                                                        <button 
+                                                            onClick={() => handleBlockUser(u.id, u.is_blocked)} 
+                                                            className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all ${u.is_blocked ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100'}`}
+                                                        >
+                                                            {u.is_blocked ? 'Unsuspend' : 'Block Access'}
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteUser(u.id)} 
+                                                            className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-rose-500 hover:shadow-md hover:shadow-rose-200 transition-all ml-2"
+                                                            title="Delete Permanently"
+                                                        >
+                                                            <XCircle className="h-5 w-5" />
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {u.email === 'agbello@noun.edu.ng' && (
+                                                    <span className="text-xs font-bold text-slate-400 italic">Protected</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {systemUsers.length === 0 && (
+                                        <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500 font-medium">Fetching directory index...</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        {/* Analytics Section */}
+                        {stats && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300 relative overflow-hidden group">
                             <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
@@ -397,6 +532,8 @@ export default function AdminDashboard() {
                         </div>
                     )}
                 </div>
+                </>
+                )}
 
             </main>
         </div>

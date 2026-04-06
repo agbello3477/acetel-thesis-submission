@@ -66,6 +66,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        if (user.is_blocked) {
+            res.status(403).json({ error: 'Your account has been suspended by the administrator.' });
+            return;
+        }
+
         const payload = {
             id: user.id,
             role: user.role,
@@ -78,5 +83,56 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const getUsers = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const user = (req as any).user;
+        if (user.email !== 'agbello@noun.edu.ng') {
+            res.status(403).json({ error: 'Access denied. Super Admin strictly required.' });
+            return;
+        }
+
+        const result = await query('SELECT id, full_name, email, role, phone_number, program_type, matric_number, is_blocked, created_at FROM users ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error fetching users' });
+    }
+};
+
+export const blockUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const user = (req as any).user;
+        if (user.email !== 'agbello@noun.edu.ng') {
+            res.status(403).json({ error: 'Access denied. Super Admin strictly required.' });
+            return;
+        }
+        const { id } = req.params;
+        const { is_blocked } = req.body; // true or false
+        
+        await query('UPDATE users SET is_blocked = $1 WHERE id = $2', [is_blocked, id]);
+        res.json({ message: `User mathematically ${is_blocked ? 'blocked' : 'unblocked'}` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error modifying user block status' });
+    }
+};
+
+export const deleteUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const user = (req as any).user;
+        if (user.email !== 'agbello@noun.edu.ng') {
+            res.status(403).json({ error: 'Access denied. Super Admin strictly required.' });
+            return;
+        }
+        const { id } = req.params;
+        
+        await query('DELETE FROM users WHERE id = $1', [id]);
+        res.json({ message: 'User completely removed from system' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error deleting user' });
     }
 };
