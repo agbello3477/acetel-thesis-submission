@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
-import { LogOut, FileText, CheckCircle, Clock, XCircle, ChevronRight, Download, Search, User, Calendar, DownloadCloud } from 'lucide-react';
+import { LogOut, FileText, CheckCircle, Clock, XCircle, ChevronRight, Download, Search, User, Calendar, DownloadCloud, Shield } from 'lucide-react';
 import { LogoSlider } from '@/components/LogoSlider';
 
 export default function AdminDashboard() {
