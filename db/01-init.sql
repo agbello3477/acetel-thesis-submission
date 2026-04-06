@@ -47,3 +47,12 @@ CREATE TABLE submission_logs (
     comments TEXT,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 4. Global Activity Logs
+CREATE TABLE IF NOT EXISTS activity_logs (
+    id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    action_type VARCHAR(50),
+    target TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
