@@ -155,7 +155,8 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
                 navigate('/student/dashboard');
             }
         } catch (err: any) {
-            toast.error(err.response?.data?.error || 'Login failed');
+            console.error('Fetch error:', err);
+            toast.error(err.response?.data?.error || err.message || 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -179,7 +180,8 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
                 password: '',
             });
         } catch (err: any) {
-            toast.error(err.response?.data?.error || 'Registration failed');
+            console.error('Fetch error:', err);
+            toast.error(err.response?.data?.error || err.message || 'Registration failed');
         } finally {
             setLoading(false);
         }
@@ -202,7 +204,8 @@ function AuthWidget({ mode, setMode }: { mode: 'login' | 'register' | 'admin_reg
                 role: 'admin',
             });
         } catch (err: any) {
-            toast.error(err.response?.data?.error || 'Registration failed');
+            console.error('Fetch error:', err);
+            toast.error(err.response?.data?.error || err.message || 'Registration failed');
         } finally {
             setLoading(false);
         }
