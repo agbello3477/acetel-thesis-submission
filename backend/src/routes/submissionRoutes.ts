@@ -1,5 +1,5 @@
 import express from 'express';
-import { submitThesis, getSubmissions, getSubmissionById, updateSubmissionStatus } from '../controllers/submissionController';
+import { submitThesis, getSubmissions, getSubmissionById, updateSubmissionStatus, downloadThesis } from '../controllers/submissionController';
 import { authenticate, authorizeRole } from '../middleware/authMiddleware';
 import upload from '../middleware/uploadMiddleware';
 
@@ -12,6 +12,7 @@ router.get('/my-submissions', authenticate, authorizeRole(['student']), getSubmi
 // Admin routes
 router.get('/', authenticate, authorizeRole(['admin']), getSubmissions);
 router.get('/:id', authenticate, getSubmissionById);
+router.get('/:id/download', authenticate, downloadThesis);
 router.put('/:id/status', authenticate, authorizeRole(['admin']), updateSubmissionStatus);
 
 export default router;

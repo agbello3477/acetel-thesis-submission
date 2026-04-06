@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
-import { LogOut, FileText, CheckCircle, Clock, XCircle, ChevronRight, Download } from 'lucide-react';
+import { LogOut, FileText, CheckCircle, Clock, XCircle, ChevronRight, Download, Search, User, Calendar, DownloadCloud } from 'lucide-react';
 import { LogoSlider } from '@/components/LogoSlider';
 
 export default function AdminDashboard() {
@@ -12,6 +12,9 @@ export default function AdminDashboard() {
     const [stats, setStats] = useState<any>(null);
     const [submissions, setSubmissions] = useState([]);
     const [filter, setFilter] = useState('All');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [yearFilter, setYearFilter] = useState('All');
+    const [programFilter, setProgramFilter] = useState('All');
     const [user, setUser] = useState<any>(null);
 
     const [, setLatestSubId] = useState<string | null>(null);
@@ -105,9 +108,21 @@ export default function AdminDashboard() {
         toast.success('Report exported as CSV');
     };
 
-    const filteredSubmissions = filter === 'All' 
-        ? submissions 
-        : submissions.filter((sub: any) => sub.status === filter);
+    const uniqueYears = Array.from(new Set(submissions.map((s: any) => s.submission_year))).sort().reverse();
+    const uniquePrograms = Array.from(new Set(submissions.map((s: any) => s.program_type)));
+
+    let filteredSubmissions = submissions;
+    if (filter !== 'All') filteredSubmissions = filteredSubmissions.filter((sub: any) => sub.status === filter);
+    if (yearFilter !== 'All') filteredSubmissions = filteredSubmissions.filter((sub: any) => sub.submission_year?.toString() === yearFilter);
+    if (programFilter !== 'All') filteredSubmissions = filteredSubmissions.filter((sub: any) => sub.program_type === programFilter);
+    if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        filteredSubmissions = filteredSubmissions.filter((sub: any) => 
+            sub.title.toLowerCase().includes(q) || 
+            sub.full_name.toLowerCase().includes(q) ||
+            sub.matric_number?.toLowerCase().includes(q)
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
@@ -259,20 +274,45 @@ export default function AdminDashboard() {
                             <h3 className="text-lg font-bold text-slate-800">Review Queue</h3>
                             <p className="text-sm text-slate-500 mt-1">Manage and assess recent thesis submissions</p>
                         </div>
-                        <div className="flex items-center gap-2 bg-white p-1 rounded-2xl border border-slate-200 overflow-x-auto max-w-full">
-                            {['All', 'Submitted', 'Under Review', 'Approved', 'Correction Required', 'Rejected'].map((status) => (
-                                <button
-                                    key={status}
-                                    onClick={() => setFilter(status)}
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                                        filter === status 
-                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' 
-                                        : 'text-slate-500 hover:bg-slate-50'
-                                    }`}
-                                >
-                                    {status}
-                                </button>
-                            ))}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search topic, student..."
+                                    className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full sm:w-64 font-medium"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <select
+                                title="Filter by year"
+                                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 font-medium text-slate-600"
+                                value={yearFilter}
+                                onChange={(e) => setYearFilter(e.target.value)}
+                            >
+                                <option value="All">All Years</option>
+                                {uniqueYears.map((year: any) => <option key={year} value={year}>{year}</option>)}
+                            </select>
+                            <select
+                                title="Filter by program"
+                                className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 font-medium text-slate-600"
+                                value={programFilter}
+                                onChange={(e) => setProgramFilter(e.target.value)}
+                            >
+                                <option value="All">All Programs</option>
+                                {uniquePrograms.map((prog: any) => <option key={prog} value={prog}>{prog}</option>)}
+                            </select>
+                            <select
+                                title="Filter by status"
+                                className="px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-xl text-sm outline-none focus:border-indigo-500 font-bold text-indigo-700"
+                                value={filter}
+                                onChange={(e) => setFilter(e.target.value)}
+                            >
+                                {['All', 'Submitted', 'Under Review', 'Approved', 'Correction Required', 'Rejected'].map((status) => (
+                                    <option key={status} value={status}>{status === 'All' ? 'All Status' : status}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     <ul className="divide-y divide-slate-100">
@@ -292,24 +332,25 @@ export default function AdminDashboard() {
                                                     <Clock className="h-5 w-5" />}
                                         </div>
                                         <div>
-                                            <p className="font-bold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{sub.title}</p>
-                                            <div className="flex flex-wrap items-center gap-2 mt-1.5 text-sm text-slate-500 font-medium">
-                                                <span className="text-slate-700">{sub.full_name}</span>
-                                                <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                                                <span className="bg-slate-100 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider">{sub.matric_number}</span>
-                                                <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                            <p className="font-bold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors leading-tight mb-2 max-w-2xl">{sub.title}</p>
+                                            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 font-medium">
+                                                <span className="text-slate-700 font-semibold">{sub.full_name}</span>
+                                                <span className="bg-slate-100 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">{sub.matric_number}</span>
                                                 <span className="text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full text-xs font-bold">{sub.program_type}</span>
+                                                <span className="flex items-center gap-1.5 ml-2"><User className="h-3.5 w-3.5 text-slate-400" /> Sup: {sub.supervisor_name}</span>
+                                                <span className="flex items-center gap-1.5 ml-2"><Calendar className="h-3.5 w-3.5 text-slate-400" /> {new Date(sub.created_at).toLocaleDateString()}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 sm:ml-auto">
-                                        <span className={`px-3 py-1.5 text-xs font-bold rounded-full border shadow-sm
+                                    <div className="flex items-center gap-3 sm:ml-auto">
+                                        <span className={`hidden md:inline-flex px-3 py-1 text-[11px] font-bold uppercase tracking-widest rounded-full border shadow-sm
                                           ${sub.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                                                 sub.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' :
                                                     sub.status === 'Correction Required' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                                                         'bg-blue-50 text-blue-700 border-blue-200'}`}>
                                             {sub.status}
                                         </span>
+                                        <DownloadButton id={sub.id} />
                                         <ReviewComponent sub={sub} refresh={fetchData} />
                                     </div>
                                 </div>
@@ -411,5 +452,25 @@ function ReviewComponent({ sub, refresh }: { sub: any, refresh: () => void }) {
                 </div>
             )}
         </>
+    );
+}
+
+function DownloadButton({ id }: { id: string }) {
+    const [loading, setLoading] = useState(false);
+    const handleDownload = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get(`/submissions/${id}/download`);
+            if (res.data.downloadUrl) window.open(res.data.downloadUrl, '_blank');
+        } catch (err: any) {
+            toast.error(err.response?.data?.error || 'Failed to download');
+        } finally {
+            setLoading(false);
+        }
+    };
+    return (
+        <Button onClick={handleDownload} disabled={loading} size="sm" className="rounded-full font-bold shadow-sm shadow-indigo-100 bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-50">
+            <DownloadCloud className="h-4 w-4 mr-2" /> {loading ? '...' : 'Get PDF'}
+        </Button>
     );
 }

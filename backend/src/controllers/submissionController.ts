@@ -189,3 +189,37 @@ export const updateSubmissionStatus = async (req: Request, res: Response): Promi
         res.status(500).json({ error: 'Internal server error during status update' });
     }
 };
+
+export const downloadThesis = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const user = (req as any).user;
+
+        const result = await query(`SELECT file_path, student_id FROM submissions WHERE id = $1`, [id]);
+        
+        if (result.rows.length === 0) {
+            res.status(404).json({ error: 'Submission not found' });
+            return;
+        }
+
+        const submission = result.rows[0];
+
+        // Access control: admins and the owning student can download
+        if (user.role !== 'admin' && submission.student_id !== user.id) {
+            res.status(403).json({ error: 'Access denied' });
+            return;
+        }
+
+        if (!submission.file_path) {
+            res.status(404).json({ error: 'File path not found for this submission' });
+            return;
+        }
+
+        const url = await minioClient.presignedGetObject(BUCKET_NAME, submission.file_path, 60 * 60); // 1 hour expiry
+        
+        res.json({ downloadUrl: url });
+    } catch (error: any) {
+        console.error('Download error:', error);
+        res.status(500).json({ error: error.message || 'Internal server error generating download link' });
+    }
+};
