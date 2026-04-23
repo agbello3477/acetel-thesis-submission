@@ -258,7 +258,7 @@ export default function AdminDashboard() {
 
                 {/* Scrollable Body Container */}
                 <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
-                    <div className="max-w-7xl mx-auto animate-fade-in-up pb-12 space-y-8">
+                    <div className="max-w-7xl mx-auto pb-12 space-y-8">
                         
                         {/* 1. OVERVIEW TAB */}
                         {activeTab === 'overview' && stats && (
@@ -369,7 +369,7 @@ export default function AdminDashboard() {
 
                         {/* 2. SUBMISSIONS TAB */}
                         {activeTab === 'submissions' && (
-                            <div className="bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden animate-fade-in-up">
+                            <div className="bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden">
                                 <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-800">Review Queue</h3>
@@ -613,7 +613,7 @@ function ReviewComponent({ sub, refresh }: { sub: any, refresh: () => void }) {
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={() => setIsOpen(false)}></div>
-                    <div className="relative w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl animate-fade-in-up border border-slate-100">
+                    <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl animate-fade-in-up border border-slate-100 custom-scrollbar">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold tracking-tight text-slate-900">Assess Submission</h2>
                             <button onClick={() => setIsOpen(false)} title="Close Assessment Modal" className="text-slate-400 hover:text-slate-600 transition-colors p-2 rounded-full hover:bg-slate-100">
