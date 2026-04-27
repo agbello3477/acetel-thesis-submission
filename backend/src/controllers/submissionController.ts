@@ -83,8 +83,8 @@ export const getSubmissions = async (req: Request, res: Response): Promise<void>
       `);
         } else {
             result = await query(`
-                SELECT s.* 
-                FROM submissions s 
+                SELECT id, student_id, title, abstract, keywords, supervisor_name, file_path, file_size_mb, status, admin_feedback, submission_year, created_at, updated_at
+                FROM submissions 
                 WHERE student_id = $1 
                 ORDER BY created_at DESC
             `, [user.id]);
@@ -103,7 +103,8 @@ export const getSubmissionById = async (req: Request, res: Response): Promise<vo
         const user = (req as any).user;
 
         const result = await query(`
-      SELECT s.*, u.full_name, u.matric_number, u.program_type 
+      SELECT s.id, s.student_id, s.title, s.abstract, s.keywords, s.supervisor_name, s.file_path, s.file_size_mb, s.status, s.admin_feedback, s.submission_year, s.created_at, s.updated_at,
+             u.full_name, u.matric_number, u.program_type 
       FROM submissions s 
       JOIN users u ON s.student_id = u.id 
       WHERE s.id = $1
@@ -226,5 +227,87 @@ export const downloadThesis = async (req: Request, res: Response): Promise<void>
     } catch (error: any) {
         console.error('Download error:', error);
         res.status(500).json({ error: error.message || 'Internal server error generating download link' });
+    }
+};
+
+export const editSubmission = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const { title, abstract, keywords, supervisor_name, submission_year } = req.body;
+        const user = (req as any).user;
+
+        const checkResult = await query('SELECT student_id, status FROM submissions WHERE id = $1', [id]);
+        if (checkResult.rows.length === 0) {
+            res.status(404).json({ error: 'Submission not found' });
+            return;
+        }
+
+        const sub = checkResult.rows[0];
+        if (sub.student_id !== user.id) {
+            res.status(403).json({ error: 'Access denied' });
+            return;
+        }
+
+        if (sub.status !== 'Submitted' && sub.status !== 'Correction Required') {
+            res.status(400).json({ error: 'Cannot edit submission in current status' });
+            return;
+        }
+
+        await query(
+            `UPDATE submissions SET title = $1, abstract = $2, keywords = $3, supervisor_name = $4, submission_year = $5, updated_at = CURRENT_TIMESTAMP WHERE id = $6`,
+            [title, abstract, keywords, supervisor_name, submission_year, id]
+        );
+
+        await query(
+            `INSERT INTO submission_logs (submission_id, action_by, action_taken, comments) VALUES ($1, $2, $3, $4)`,
+            [id, user.id, 'Edited', 'Student updated submission details']
+        );
+
+        res.json({ message: 'Submission updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error during edit' });
+    }
+};
+
+export const retractSubmission = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const user = (req as any).user;
+
+        const checkResult = await query('SELECT student_id, status, file_path FROM submissions WHERE id = $1', [id]);
+        if (checkResult.rows.length === 0) {
+            res.status(404).json({ error: 'Submission not found' });
+            return;
+        }
+
+        const sub = checkResult.rows[0];
+        if (sub.student_id !== user.id) {
+            res.status(403).json({ error: 'Access denied' });
+            return;
+        }
+
+        if (sub.status !== 'Submitted' && sub.status !== 'Correction Required') {
+            res.status(400).json({ error: 'Cannot retract submission in current status' });
+            return;
+        }
+
+        // Delete file from MinIO
+        if (sub.file_path) {
+            try {
+                await minioClient.removeObject(BUCKET_NAME, sub.file_path);
+            } catch (err) {
+                console.error('MinIO file removal failed:', err);
+            }
+        }
+
+        // Delete logs and submission
+        await query('DELETE FROM submission_logs WHERE submission_id = $1', [id]);
+        await query('DELETE FROM submissions WHERE id = $1', [id]);
+
+        res.json({ message: 'Submission retracted and deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error during retraction' });
     }
 };

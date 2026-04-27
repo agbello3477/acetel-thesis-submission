@@ -1,5 +1,5 @@
 import express from 'express';
-import { submitThesis, getSubmissions, getSubmissionById, updateSubmissionStatus, downloadThesis } from '../controllers/submissionController';
+import { submitThesis, getSubmissions, getSubmissionById, updateSubmissionStatus, downloadThesis, editSubmission, retractSubmission } from '../controllers/submissionController';
 import { authenticate, authorizeRole } from '../middleware/authMiddleware';
 import upload from '../middleware/uploadMiddleware';
 
@@ -8,6 +8,8 @@ const router = express.Router();
 // Student routes
 router.post('/', authenticate, authorizeRole(['student']), upload.single('thesis'), submitThesis);
 router.get('/my-submissions', authenticate, authorizeRole(['student']), getSubmissions);
+router.put('/:id', authenticate, authorizeRole(['student']), editSubmission);
+router.delete('/:id/retract', authenticate, authorizeRole(['student']), retractSubmission);
 
 // Admin routes
 router.get('/', authenticate, authorizeRole(['admin']), getSubmissions);

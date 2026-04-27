@@ -38,6 +38,17 @@ export default function StudentDashboard() {
         });
     };
 
+    const handleRetract = async (id: string) => {
+        if (!window.confirm('Are you absolutely sure you want to retract this submission? This will permanently delete the file and record.')) return;
+        try {
+            await api.delete(`/submissions/${id}/retract`);
+            toast.success('Submission retracted successfully');
+            fetchSubmissions();
+        } catch (err: any) {
+            toast.error(err.response?.data?.error || 'Failed to retract submission');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50/50">
             <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30">
@@ -110,6 +121,19 @@ export default function StudentDashboard() {
                                                 <User className="h-3.5 w-3.5 text-slate-400" />
                                                 <span>{sub.supervisor_name}</span>
                                             </div>
+                                            {(sub.status === 'Submitted' || sub.status === 'Correction Required') && (
+                                                <div className="flex gap-2 mt-2">
+                                                    <EditComponent sub={sub} refresh={fetchSubmissions} />
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        onClick={() => handleRetract(sub.id)}
+                                                        className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 h-8 rounded-lg"
+                                                    >
+                                                        Retract
+                                                    </Button>
+                                                </div>
+                                            )}
                                             <div className="flex items-center gap-2">
                                                 <Calendar className="h-3.5 w-3.5 text-slate-400" />
                                                 <span>Submitted: {sub.submission_year}</span>
@@ -335,5 +359,119 @@ function NewSubmission({ fetchSubmissions }: { fetchSubmissions: () => void }) {
                 </form>
             </div>
         </div>
+    );
+}
+
+function EditComponent({ sub, refresh }: { sub: any, refresh: () => void }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState({
+        title: sub.title,
+        abstract: sub.abstract,
+        keywords: sub.keywords,
+        supervisor_name: sub.supervisor_name,
+        submission_year: sub.submission_year
+    });
+
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await api.put(`/submissions/${sub.id}`, form);
+            toast.success('Submission updated successfully');
+            setIsOpen(false);
+            refresh();
+        } catch (err: any) {
+            toast.error(err.response?.data?.error || 'Update failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <>
+            <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsOpen(true)}
+                className="text-xs font-bold text-indigo-600 border-indigo-100 hover:bg-indigo-50 h-8 rounded-lg"
+            >
+                Edit Details
+            </Button>
+
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsOpen(false)}></div>
+                    <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up border border-slate-100 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 className="text-xl font-bold text-slate-900">Edit Submission</h3>
+                            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                                <XCircle className="h-6 w-6 text-slate-400" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdate} className="p-8 space-y-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Thesis Title</label>
+                                    <Input 
+                                        value={form.title}
+                                        onChange={e => setForm({...form, title: e.target.value})}
+                                        className="rounded-xl border-slate-200 focus:ring-indigo-500"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Abstract</label>
+                                    <textarea 
+                                        value={form.abstract}
+                                        onChange={e => setForm({...form, abstract: e.target.value})}
+                                        className="w-full rounded-xl border-slate-200 focus:ring-indigo-500 min-h-[120px] p-3 border text-sm"
+                                        required
+                                    />
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Keywords (comma separated)</label>
+                                        <Input 
+                                            value={form.keywords}
+                                            onChange={e => setForm({...form, keywords: e.target.value})}
+                                            className="rounded-xl border-slate-200"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-1.5">Supervisor Name</label>
+                                        <Input 
+                                            value={form.supervisor_name}
+                                            onChange={e => setForm({...form, supervisor_name: e.target.value})}
+                                            className="rounded-xl border-slate-200"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Submission Year</label>
+                                    <Input 
+                                        type="number"
+                                        value={form.submission_year}
+                                        onChange={e => setForm({...form, submission_year: parseInt(e.target.value)})}
+                                        className="rounded-xl border-slate-200"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-3 pt-4">
+                                <Button type="submit" disabled={loading} className="flex-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-md py-6 font-bold">
+                                    {loading ? 'Updating...' : 'Save Changes'}
+                                </Button>
+                                <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="rounded-xl py-6 px-8 border-slate-200 font-bold">
+                                    Cancel
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
