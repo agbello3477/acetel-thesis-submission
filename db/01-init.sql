@@ -34,6 +34,7 @@ CREATE TABLE submissions (
             'Correction Required'
         )
     ),
+    admin_feedback TEXT,
     submission_year INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

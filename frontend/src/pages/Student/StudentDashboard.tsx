@@ -117,12 +117,12 @@ export default function StudentDashboard() {
                                         </div>
                                     </div>
 
-                                    {sub.admin_comment && sub.status !== 'Submitted' && (
+                                    {sub.admin_feedback && sub.status !== 'Submitted' && (
                                         <div className="mt-5 p-4 bg-slate-50/80 rounded-2xl border border-slate-100 shadow-inner">
                                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                                                 <FileText className="h-3.5 w-3.5 text-indigo-400" /> Reviewer Notes
                                             </p>
-                                            <p className="text-sm font-medium text-slate-700 italic">"{sub.admin_comment}"</p>
+                                            <p className="text-sm font-medium text-slate-700 italic">"{sub.admin_feedback}"</p>
                                         </div>
                                     )}
                                 </div>

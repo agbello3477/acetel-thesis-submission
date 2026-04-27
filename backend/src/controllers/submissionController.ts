@@ -83,8 +83,7 @@ export const getSubmissions = async (req: Request, res: Response): Promise<void>
       `);
         } else {
             result = await query(`
-                SELECT s.*, 
-                       (SELECT comments FROM submission_logs l WHERE l.submission_id = s.id ORDER BY l.timestamp DESC LIMIT 1) as admin_comment
+                SELECT s.* 
                 FROM submissions s 
                 WHERE student_id = $1 
                 ORDER BY created_at DESC
@@ -158,8 +157,8 @@ export const updateSubmissionStatus = async (req: Request, res: Response): Promi
         }
 
         const result = await query(
-            `UPDATE submissions SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`,
-            [status, id]
+            `UPDATE submissions SET status = $1, admin_feedback = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *`,
+            [status, comments, id]
         );
 
         if (result.rows.length === 0) {

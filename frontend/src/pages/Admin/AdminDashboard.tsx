@@ -438,6 +438,7 @@ export default function AdminDashboard() {
                                                             <span className="text-slate-700 font-semibold">{sub.full_name}</span>
                                                             <span className="bg-slate-100 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">{sub.matric_number}</span>
                                                             <span className="text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full text-xs font-bold">{sub.program_type}</span>
+                                                            {sub.admin_feedback && <span className="bg-amber-50 text-amber-700 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border border-amber-100">Has Feedback</span>}
                                                             <span className="flex items-center gap-1.5 ml-2"><User className="h-3.5 w-3.5 text-slate-400" /> Sup: {sub.supervisor_name}</span>
                                                             <span className="flex items-center gap-1.5 ml-2"><Calendar className="h-3.5 w-3.5 text-slate-400" /> {new Date(sub.created_at).toLocaleDateString()}</span>
                                                         </div>
@@ -582,7 +583,7 @@ export default function AdminDashboard() {
 
 function ReviewComponent({ sub, refresh }: { sub: any, refresh: () => void }) {
     const [isOpen, setIsOpen] = useState(false);
-    const [comments, setComments] = useState('');
+    const [comments, setComments] = useState(sub.admin_feedback || '');
     const [status, setStatus] = useState(sub.status);
     const [loading, setLoading] = useState(false);
 

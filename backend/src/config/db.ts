@@ -16,4 +16,13 @@ export const query = (text: string, params?: any[]) => {
     return pool.query(text, params);
 };
 
+export const checkSchema = async () => {
+    try {
+        await query('ALTER TABLE submissions ADD COLUMN IF NOT EXISTS admin_feedback TEXT;');
+        console.log('Schema verification: admin_feedback column ensured.');
+    } catch (err) {
+        console.error('Schema verification failed:', err);
+    }
+};
+
 export default pool;
