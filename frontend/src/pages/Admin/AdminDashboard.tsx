@@ -587,6 +587,11 @@ function ReviewComponent({ sub, refresh }: { sub: any, refresh: () => void }) {
     const [status, setStatus] = useState(sub.status);
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        setComments(sub.admin_feedback || '');
+        setStatus(sub.status);
+    }, [sub.id, sub.admin_feedback, sub.status]);
+
     const handleUpdate = async () => {
         setLoading(true);
         try {
