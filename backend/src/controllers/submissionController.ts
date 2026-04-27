@@ -158,7 +158,7 @@ export const updateSubmissionStatus = async (req: Request, res: Response): Promi
 
         const result = await query(
             `UPDATE submissions SET status = $1, admin_feedback = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *`,
-            [status, comments, id]
+            [status, comments || null, id]
         );
 
         if (result.rows.length === 0) {

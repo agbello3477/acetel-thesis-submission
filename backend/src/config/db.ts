@@ -19,7 +19,24 @@ export const query = (text: string, params?: any[]) => {
 export const checkSchema = async () => {
     try {
         await query('ALTER TABLE submissions ADD COLUMN IF NOT EXISTS admin_feedback TEXT;');
-        console.log('Schema verification: admin_feedback column ensured.');
+        
+        // Backfill existing feedback from logs into the new column if it's currently NULL
+        await query(`
+            UPDATE submissions s
+            SET admin_feedback = (
+                SELECT comments 
+                FROM submission_logs l 
+                WHERE l.submission_id = s.id 
+                AND l.comments IS NOT NULL 
+                AND l.comments NOT LIKE 'Status updated to %'
+                AND l.comments != 'Initial submission uploaded'
+                ORDER BY l.timestamp DESC 
+                LIMIT 1
+            )
+            WHERE admin_feedback IS NULL;
+        `);
+        
+        console.log('Schema verification: admin_feedback column ensured and backfilled.');
     } catch (err) {
         console.error('Schema verification failed:', err);
     }
